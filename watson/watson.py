@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import itertools
 import json
 import operator
 import os
@@ -282,14 +283,15 @@ class Watson(object):
         """
         Return the list of all the existing projects, sorted by name.
         """
-        return sorted(set(self.frames['project']))
+        return sorted(set(self.frames.get_column('project')))
 
     @property
     def tags(self):
         """
         Return the list of the tags, sorted by name.
         """
-        return sorted(set(tag for tags in self.frames['tags'] for tag in tags))
+        return sorted(
+            set(itertools.chain.from_iterable(self.frames.get_column('tags'))))
 
     def _get_request_info(self, route):
         config = self.config
@@ -368,7 +370,7 @@ class Watson(object):
 
         frames = []
 
-        for frame in self.frames:
+        for frame in self.frames.values():
             if last_pull > frame.updated_at > self.last_sync:
                 frames.append({
                     'id': uuid.UUID(frame.id).urn,
@@ -400,7 +402,7 @@ class Watson(object):
         conflicting = []
         merging = []
 
-        for conflict_frame in conflict_file_frames:
+        for conflict_frame in conflict_file_frames.values():
             try:
                 original_frame = self.frames[conflict_frame.id]
 
