@@ -341,6 +341,7 @@ def test_given_frames(config_dir, mock):
 
 
 def test_frames_with_empty_given_state(config_dir, mock):
+
     content = json.dumps([['abcdefg', 'foo', 0, 10, ['A']]])
     watson = Watson(frames=[], config_dir=config_dir)
 
@@ -479,6 +480,7 @@ def test_stop_started_project_with_message(watson):
     assert frame.message == "My hovercraft is full of eels"
 
 
+
 def test_stop_no_project(watson):
     with pytest.raises(WatsonError):
         watson.stop()
@@ -554,6 +556,7 @@ def test_save_empty_current(config_dir, mock):
     assert result == {}
 
 
+
 def test_save_frames_no_change(config_dir, mock):
     watson = Watson(frames=[['abcdefg', 'foo', 0, 10]],
                     config_dir=config_dir)
@@ -573,6 +576,7 @@ def test_save_added_frame(config_dir, mock):
     json_mock = mock.patch('json.dump')
     watson.save()
 
+
     assert json_mock.call_count == 1
     result = json_mock.call_args[0][0]
     assert len(result) == 2
@@ -591,18 +595,18 @@ def test_save_changed_frame(config_dir, mock):
     json_mock = mock.patch('json.dump')
     watson.save()
 
-
     assert json_mock.call_count == 1
     result = json_mock.call_args[0][0]
-    assert len(result) == 1
+    assert len(result) == 2
     assert result[0][0] == 'abcdefg'
-    assert result[0][1] == 'bar'
+    assert result[0][1] == 'foo'
     assert result[0][2] == 0
     assert result[0][3] == 10
-    assert result[0][4] == ['A', 'B']
-
-    dump_args = json_mock.call_args[1]
-    assert dump_args['ensure_ascii'] is False
+    assert result[0][4] == []
+    assert result[1][1] == 'bar'
+    assert result[1][2] == 10
+    assert result[1][3] == 20
+    assert result[1][4] == ['A']
 
 
 def test_save_config_no_changes(mock, watson):
@@ -828,7 +832,6 @@ def test_pull(mock, watson):
 
     assert len(watson.frames) == 2
 
-
     frame = watson.frames.get_by_index(0)
     assert frame.id == '1'
     assert frame.project == 'foo'
@@ -842,7 +845,6 @@ def test_pull(mock, watson):
     assert frame.start.timestamp == 4
     assert frame.stop.timestamp == 5
     assert frame.tags == []
-
 
 
 # projects

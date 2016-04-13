@@ -6,8 +6,8 @@ import arrow
 
 from collections import OrderedDict, namedtuple
 
-FIELDS = ('id', 'project', 'start', 'stop', 'tags', 'updated_at', 'message')
 
+FIELDS = ('id', 'project', 'start', 'stop', 'tags', 'updated_at', 'message')
 
 class Frame(namedtuple('Frame', FIELDS)):
     def __new__(cls, id, project, start, stop, tags=None, updated_at=None,
@@ -75,6 +75,7 @@ class Span(object):
 class Frames(OrderedDict):
     def __init__(self, frames=None):
         super(Frames, self).__init__()
+
         self._keys = list(self.keys())
 
         for frame in frames or []:
@@ -87,10 +88,12 @@ class Frames(OrderedDict):
                     frame[1]   # stop
                 ) + tuple(frame[4:])
 
+
             frame = Frame(*frame)
             self[frame.id] = frame
 
         self.changed = False
+
 
     def __getitem__(self, id):
         try:
@@ -126,6 +129,21 @@ class Frames(OrderedDict):
         self._keys.remove(key)
         self._keys.insert(len(self._keys) if last else 0, key)
 
+    def __setitem__(self, key, value):
+        if isinstance(value, Frame):
+            frame = self.new_frame(value.project, value.start, value.stop,
+                                   value.tags, value.updated_at, id=key)
+        else:
+            frame = self.new_frame(*value[:5], id=key)
+
+        super(Frames, self).__setitem__(key, frame)
+        self.changed = True
+
+    def __delitem__(self, key):
+        super(Frames, self).__delitem__(key)
+        self.changed = True
+
+
     def add(self, *args, **kwargs):
         frame = self.new_frame(*args, **kwargs)
         self[frame.id] = frame
@@ -149,7 +167,9 @@ class Frames(OrderedDict):
                 yield frame
 
     def get_by_index(self, index):
-        return self[self._keys[index]]
+        key = list(self.keys())[index]
+        return self[key]
+
 
     def get_column(self, col):
         index = FIELDS.index(col)
