@@ -130,6 +130,7 @@ def test_last_sync_with_empty_given_state(config_dir, mock):
 def test_frames(mock, watson):
     content = json.dumps([['abcdefg', 'foo', 0, 10, ['A', 'B', 'C']]])
 
+
     mock.patch('%s.open' % builtins, mock.mock_open(read_data=content))
     assert len(watson.frames) == 1
     frame = watson.frames.get_by_index(0)
@@ -145,12 +146,67 @@ def test_frames_without_tags(mock, watson):
 
     mock.patch('%s.open' % builtins, mock.mock_open(read_data=content))
     assert len(watson.frames) == 1
-    frame = watson.frames.get_by_index(0)
+    frame = watson.frames['abcdefg']
     assert frame.id == 'abcdefg'
     assert frame.project == 'foo'
     assert frame.start == arrow.get(0)
     assert frame.stop == arrow.get(10)
     assert frame.tags == []
+
+
+def test_frames_get_by_index(watson):
+    test_frames = (
+        ('0', ('project0',  0, 10)),
+        ('1', ('project1', 10, 20)),
+        ('2', ('project2', 20, 30)),
+        ('3', ('project3', 30, 40)),
+        ('4', ('project4', 40, 50))
+    )
+
+    for id, frame in test_frames[:-1]:
+        watson.frames[id] = frame
+
+    assert len(watson.frames) == 4
+    assert watson.frames.get_by_index(0).id == '0'
+    assert watson.frames.get_by_index(0).project == 'project0'
+    assert watson.frames.get_by_index(2).id == '2'
+    assert watson.frames.get_by_index(2).project == 'project2'
+    assert watson.frames.get_by_index(-1).id == '3'
+    assert watson.frames.get_by_index(-1).project == 'project3'
+
+    # adding an item
+    id, frame = test_frames[-1]
+    watson.frames[id] = frame
+    assert len(watson.frames) == 5
+    assert watson.frames.get_by_index(3).id == '3'
+    assert watson.frames.get_by_index(-1).id == '4'
+
+    # setting an existing item
+    assert watson.frames.get_by_index(2).project == 'project2'
+    watson.frames['2'] = ('project6', 50, 60)
+    assert len(watson.frames) == 5
+    assert watson.frames.get_by_index(2).project == 'project6'
+
+    # deleting an item
+    del watson.frames['2']
+    assert len(watson.frames) == 4
+    assert watson.frames.get_by_index(2).id == '3'
+    assert watson.frames.get_by_index(2).project == 'project3'
+
+    # index out of range
+    with pytest.raises(IndexError):
+        watson.frames.get_by_index(4)
+
+    if not PY2:
+        # move_to_end
+        assert watson.frames.get_by_index(0).project == 'project0'
+        watson.frames.move_to_end('0')
+        assert watson.frames.get_by_index(-1).project == 'project0'
+
+        assert watson.frames.get_by_index(0).project == 'project1'
+        watson.frames.move_to_end('4', False)
+        assert watson.frames.get_by_index(0).project == 'project4'
+
 
 
 
@@ -196,6 +252,7 @@ def test_frames_from_sequence_of_lists(watson):
     assert frame.project == 'project0'
     assert frame.start == arrow.get(0)
     assert frame.stop == arrow.get(10)
+
 
     frame = watson.frames.get_by_index(1)
     assert isinstance(frame, Frame)
