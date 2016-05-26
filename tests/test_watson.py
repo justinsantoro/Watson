@@ -313,7 +313,6 @@ def test_frames_with_empty_file(mock, watson):
     mock.patch('os.path.getsize', return_value=0)
     assert len(watson.frames) == 0
 
-
 def test_frames_with_nonexistent_file(mock, watson):
     mock.patch('%s.open' % builtins, side_effect=IOError)
     assert len(watson.frames) == 0
@@ -453,6 +452,31 @@ def test_stop_started_project_without_tags(watson):
     assert isinstance(frame.start, arrow.Arrow)
     assert isinstance(frame.stop, arrow.Arrow)
     assert frame.tags == []
+
+
+def test_stop_started_project_without_message(watson):
+    watson.start('foo')
+    watson.stop()
+
+    assert watson.current == {}
+    assert watson.is_started is False
+    assert len(watson.frames) == 1
+    frame = watson.frames.get_by_index(0)
+    assert frame.project == 'foo'
+    assert frame.message is None
+
+
+def test_stop_started_project_with_message(watson):
+    watson.start('foo')
+    watson._current['message'] = "My hovercraft is full of eels"
+    watson.stop()
+
+    assert watson.current == {}
+    assert watson.is_started is False
+    assert len(watson.frames) == 1
+    frame = watson.frames.get_by_index(0)
+    assert frame.project == 'foo'
+    assert frame.message == "My hovercraft is full of eels"
 
 
 def test_stop_no_project(watson):
