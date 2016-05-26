@@ -87,7 +87,6 @@ class Frames(OrderedDict):
                     frame[1]   # stop
                 ) + tuple(frame[4:])
 
-
             frame = Frame(*frame)
             self[frame.id] = frame
 
