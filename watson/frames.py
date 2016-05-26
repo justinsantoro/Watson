@@ -6,6 +6,8 @@ import arrow
 
 from collections import OrderedDict, namedtuple
 
+FIELDS = ('id', 'project', 'start', 'stop', 'tags', 'updated_at', 'message')
+
 
 FIELDS = ('id', 'project', 'start', 'stop', 'tags', 'updated_at', 'message')
 
