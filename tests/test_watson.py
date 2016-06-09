@@ -307,6 +307,7 @@ def test_frames_get_by_index(watson):
         watson.frames.move_to_end('4', False)
         assert watson.frames.get_by_index(0).project == 'project4'
 
+
 def test_frames_with_empty_file(mock, watson):
     mock.patch('%s.open' % builtins, mock.mock_open(read_data=""))
     mock.patch('os.path.getsize', return_value=0)
