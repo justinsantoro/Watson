@@ -592,6 +592,8 @@ def log(watson, current, from_, to, projects, tags, year, month, week, day,
     `--tag` options. They can be specified several times each to add multiple
     projects or tags to the log.
 
+    If a log message exists for a frame, then it is shown at the end of an entry.
+
     Example:
 
     \b
@@ -604,7 +606,7 @@ def log(watson, current, from_, to, projects, tags, year, month, week, day,
     \b
     Tuesday 06 May 2015 (1h 47m 22s)
             530768b  12:40 to 14:16   1h 35m 45s  apollo11  [wheels]
-            84164f0  14:23 to 14:35      11m 37s  apollo11  [brakes, steering]
+            84164f0  14:23 to 14:35      11m 37s  apollo11  [brakes, steering] - Learning how to better brake!
     \b
     Monday 05 May 2015 (8h 18m 26s)
             26a2817  09:05 to 10:03      57m 12s  voyager2  [probe, generators]
@@ -614,7 +616,7 @@ def log(watson, current, from_, to, projects, tags, year, month, week, day,
     $ watson log --from 2014-04-16 --to 2014-04-17
     Thursday 17 April 2014 (4h 19m 13s)
             a96fcde  09:15 to 09:43      28m 11s    hubble  [lens, camera, transmission]
-            5e91316  10:19 to 12:59   2h 39m 15s    hubble  [camera, transmission]
+            5e91316  10:19 to 12:59   2h 39m 15s    hubble  [camera, transmission] - I am a log message!
             761dd51  14:42 to 15:54   1h 11m 47s  voyager1  [antenna]
     \b
     Wednesday 16 April 2014 (5h 19m 18s)
