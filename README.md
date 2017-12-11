@@ -1,7 +1,5 @@
 ![Watson Logo](https://tailordev.github.io/Watson/img/logo-watson-600px.png)
 
-![Build Status][Build-Status] ![PyPI Latest Version][PyPI-Latest-Version] ![Requires IO][Requires-io]
-
 This is my personal fork of Watson that I maintain. I used Watson for several months and really enjoyed it, 
 however there were some features that I really wanted. One of the main things I wanted was the ability to add comments to
 my logged time. Luckily one of the maintainers actually had a pull request to add such a thing!
@@ -35,19 +33,11 @@ Nice isn't it?
 
 ## Installation ##
 
-On OS X, the easiest way to install **watson** is using [Homebrew](http://brew.sh/):
+Since this is a personal fork, the best (and only) way to install is from the source. You can do so with the following command:
 
 ``` bash
-$ brew update && brew install watson
+python setup.py install
 ```
-
-On other platforms, install **watson** using pip:
-
-``` bash
-$ pip install td-watson
-```
-
-If you need more details about installing watson, please refer to the [documentation](https://tailordev.github.io/Watson).
 
 ## Usage ##
 
@@ -66,12 +56,18 @@ $ watson stop
 Project world-domination [cat] started 8 minutes ago (2016.01.27 13:00:28+0100)
 ```
 
+You can add a log message when you stop a project through the ```--message``` or ```-m``` flag. For example:
+```
+$ watson stop -m "Worked on harvesting catnip"
+```
+
 You can log your latest working sessions (aka **frames**) thanks to the ```log``` command:
 
 ``` bash
 $ watson log
 Tuesday 26 January 2016 (8m 32s)
       ffb2a4c  13:00 to 13:08      08m 32s   world-domination  [cat]
+      ffb2a4c  13:08 to 13:20      08m 32s   world-domination  [cat] - Get all the catnip!
 ```
 
 Please note that, as [the report command](https://tailordev.github.io/Watson/user-guide/commands/#report), the ```log``` command comes with projects, tags and dates filtering.
@@ -92,8 +88,5 @@ If you want to contribute to this project, please read the project [Contributor 
 Watson is released under the MIT License. See the bundled LICENSE file for
 details.
 
-[Build-Status]: https://travis-ci.org/TailorDev/Watson.svg?branch=master
-[PyPI-Latest-Version]: https://img.shields.io/pypi/v/td-watson.svg
-[Requires-io]: https://requires.io/github/TailorDev/Watson/requirements.svg?branch=master
 [Watson-screenshot]: https://tailordev.github.io/Watson/img/watson-demo.gif
 
