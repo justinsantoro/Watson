@@ -49,6 +49,15 @@ def style(name, element):
         # The fmt might be a function if we need to do some computation
         return fmt(element)
 
+def style_message_if_not_none(frame, longest_message):
+    """
+    Returns a styled message if the message member of frame is not none. Returns an empty string otherwise.
+    """
+    if frame.message is not None:
+        return style('message', '- {:<{}}'.format(frame.message, longest_message))
+    else:
+        return ""
+
 
 def format_timedelta(delta):
     """
