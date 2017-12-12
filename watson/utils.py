@@ -58,7 +58,6 @@ def get_formatted_string(section, option, **kwargs):
 
 def style(name, element):
     element_style = DEFAULT_STYLES.get(name, {})
-
     try:
         config = click.get_current_context().obj.config
         element_items = config.getitems('style:%s' % name)
