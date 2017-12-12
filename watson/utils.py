@@ -42,6 +42,16 @@ DEFAULT_STYLES = {
     'message': {'fg': 'white'},
 }
 
+DEFAULT_FORMAT_STRINGS = {
+    "header_format": "{date} ({daily_total})",
+    "entry_format": "\t{id}  {start} to {stop}  {delta:>11}  {project}{tags} {message}"
+}
+
+
+def get_format_string(section, option):
+    config = click.get_current_context().obj.config
+    return config.get(section, option, DEFAULT_FORMAT_STRINGS.get(option)).replace('\\t', '\t')
+
 
 def style(name, element):
     element_style = DEFAULT_STYLES.get(name, {})

@@ -16,7 +16,7 @@ from . import watson as _watson
 from .frames import Frame
 from .utils import (format_timedelta, get_frame_from_argument,
                     get_start_time_for_period, options, safe_save,
-                    sorted_groupby, style, style_message_if_not_none)
+                    sorted_groupby, style, style_message_if_not_none, get_format_string)
 
 
 class MutuallyExclusiveOption(click.Option):
@@ -696,14 +696,14 @@ def log(watson, current, from_, to, projects, tags, year, month, week, day,
         )
 
         _print(
-            "{date} ({daily_total})".format(
+            get_format_string("log", "header_format").format(
                 date=style('date', "{:dddd DD MMMM YYYY}".format(day)),
                 daily_total=style('time', format_timedelta(daily_total))
             )
         )
 
         lines.append("\n".join(
-            "\t{id}  {start} to {stop}  {delta:>11}  {project}{tags} {message}".format(
+            get_format_string("log", "entry_format").format(
                 delta=format_timedelta(frame.stop - frame.start),
                 project=style('project',
                               '{:>{}}'.format(frame.project, longest_project)),
