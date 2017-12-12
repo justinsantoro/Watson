@@ -54,12 +54,11 @@ def style(name, element):
             if watson.functions is not None and element_items['function'] in watson.functions:
                 tmp = watson.functions[element_items.get('function')](element)
                 return tmp
+        if callable(element_style):
+            return element_style(element)
         else:
-            if callable(element_style):
-                return element_style(element)
-            else:
-                element_style = element_style.copy()
-                element_style.update(element_items)
+            element_style = element_style.copy()
+            element_style.update(element_items)
 
     except (AttributeError, RuntimeError):
         traceback.format_exc()
