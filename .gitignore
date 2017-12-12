@@ -35,3 +35,7 @@ pip-log.txt
 *.sublime-workspace
 *.swp
 *.sw[po]
+
+# IntelliJ files
+.idea/
+
