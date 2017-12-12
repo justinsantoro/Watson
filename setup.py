@@ -6,7 +6,7 @@ from os.path import join
 
 from setuptools import setup
 
-with open('README.rst') as f:
+with open('README.md') as f:
     readme = f.read()
 
 # read package meta-data from version.py
