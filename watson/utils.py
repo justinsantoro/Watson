@@ -48,9 +48,12 @@ DEFAULT_FORMAT_STRINGS = {
 }
 
 
-def get_format_string(section, option):
+def get_formatted_string(section, option, **kwargs):
     config = click.get_current_context().obj.config
-    return config.get(section, option, DEFAULT_FORMAT_STRINGS.get(option)).replace('\\t', '\t')
+    try:
+        return config.get(section, option, DEFAULT_FORMAT_STRINGS.get(option)).replace('\\t', '\t').format(**kwargs)
+    except KeyError as ke:
+        raise UsageError("Invalid key for {} in section {}".format(str(ke), section))
 
 
 def style(name, element):

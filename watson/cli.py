@@ -5,18 +5,17 @@ import itertools
 import json
 import operator
 import os
-
-from dateutil import tz
 from functools import reduce
 
 import arrow
 import click
+from dateutil import tz
 
 from . import watson as _watson
 from .frames import Frame
 from .utils import (format_timedelta, get_frame_from_argument,
                     get_start_time_for_period, options, safe_save,
-                    sorted_groupby, style, style_message_if_not_none, get_format_string)
+                    sorted_groupby, style, style_message_if_not_none, get_formatted_string)
 
 
 class MutuallyExclusiveOption(click.Option):
@@ -31,7 +30,7 @@ class MutuallyExclusiveOption(click.Option):
                 '{options}'.format(name=self.name.replace('_', ''),
                                    options=', '
                                    .join(['`--{}`'.format(_) for _ in
-                                         self.mutually_exclusive]))
+                                          self.mutually_exclusive]))
             )
 
         return super(MutuallyExclusiveOption, self).handle_parse_result(
@@ -231,7 +230,7 @@ def restart(ctx, watson, frame, stop_):
 
     if watson.is_started:
         if stop_ or (stop_ is None and
-                     watson.config.getboolean('options', 'stop_on_restart')):
+                         watson.config.getboolean('options', 'stop_on_restart')):
             ctx.invoke(stop)
         else:
             # Raise error here, instead of in watson.start(), otherwise
@@ -334,12 +333,12 @@ _SHORTCUT_OPTIONS = ['year', 'month', 'week', 'day']
               default=arrow.now().replace(days=-7),
               mutually_exclusive=_SHORTCUT_OPTIONS,
               help="The date from when the report should start. Defaults "
-              "to seven days ago.")
+                   "to seven days ago.")
 @click.option('-t', '--to', cls=MutuallyExclusiveOption, type=Date,
               default=arrow.now(),
               mutually_exclusive=_SHORTCUT_OPTIONS,
               help="The date at which the report should stop (inclusive). "
-              "Defaults to tomorrow.")
+                   "Defaults to tomorrow.")
 @click.option('-y', '--year', cls=MutuallyExclusiveOption, type=Date,
               flag_value=get_start_time_for_period('year'),
               mutually_exclusive=['day', 'week', 'month'],
@@ -358,11 +357,11 @@ _SHORTCUT_OPTIONS = ['year', 'month', 'week', 'day']
               help='Reports activity for the current day.')
 @click.option('-p', '--project', 'projects', multiple=True,
               help="Reports activity only for the given project. You can add "
-              "other projects by using this option several times.")
+                   "other projects by using this option several times.")
 @click.option('-T', '--tag', 'tags', multiple=True,
               help="Reports activity only for frames containing the given "
-              "tag. You can add several tags by using this option multiple "
-              "times")
+                   "tag. You can add several tags by using this option multiple "
+                   "times")
 @click.option('-j', '--json', 'format_json', is_flag=True,
               help="Format the report in JSON instead of plain text")
 @click.option('-g/-G', '--pager/--no-pager', 'pager', default=None,
@@ -508,6 +507,16 @@ def report(watson, current, from_, to, projects,
             project=style('project', project['name'])
         ))
 
+
+        projects = report['projects']
+        for project in projects:
+            click.echo('{project} - {time}'.format(
+                time=style('time', format_timedelta(
+                    datetime.timedelta(seconds=project['time'])
+                )),
+                project=style('project', project['name'])
+            ))
+
         tags = project['tags']
         if tags:
             longest_tag = max(len(tag) for tag in tags or [''])
@@ -539,10 +548,10 @@ def report(watson, current, from_, to, projects,
 @click.option('-f', '--from', 'from_', type=Date,
               default=arrow.now().replace(days=-7),
               help="The date from when the log should start. Defaults "
-              "to seven days ago.")
+                   "to seven days ago.")
 @click.option('-t', '--to', type=Date, default=arrow.now(),
               help="The date at which the log should stop (inclusive). "
-              "Defaults to tomorrow.")
+                   "Defaults to tomorrow.")
 @click.option('-y', '--year', cls=MutuallyExclusiveOption, type=Date,
               flag_value=get_start_time_for_period('year'),
               mutually_exclusive=['day', 'week', 'month'],
@@ -561,11 +570,11 @@ def report(watson, current, from_, to, projects,
               help='Reports activity for the current day.')
 @click.option('-p', '--project', 'projects', multiple=True,
               help="Logs activity only for the given project. You can add "
-              "other projects by using this option several times.")
+                   "other projects by using this option several times.")
 @click.option('-T', '--tag', 'tags', multiple=True,
               help="Logs activity only for frames containing the given "
-              "tag. You can add several tags by using this option multiple "
-              "times")
+                   "tag. You can add several tags by using this option multiple "
+                   "times")
 @click.option('-j', '--json', 'format_json', is_flag=True,
               help="Format the log in JSON instead of plain text")
 @click.option('-g/-G', '--pager/--no-pager', 'pager', default=None,
@@ -632,7 +641,7 @@ def log(watson, current, from_, to, projects, tags, year, month, week, day,
 
     if watson.current:
         if current or (current is None and
-                       watson.config.getboolean('options', 'log_current')):
+                           watson.config.getboolean('options', 'log_current')):
             cur = watson.current
             watson.frames.add(cur['project'], cur['start'], arrow.utcnow(),
                               cur['tags'], id="current")
@@ -652,7 +661,7 @@ def log(watson, current, from_, to, projects, tags, year, month, week, day,
                 'tags': frame.tags,
             }
             for frame in filtered_frames
-        ]
+            ]
         click.echo(json.dumps(log, indent=4, sort_keys=True))
         return
 
@@ -684,11 +693,11 @@ def log(watson, current, from_, to, projects, tags, year, month, week, day,
             _print('')
 
         frames = sorted(frames, key=operator.attrgetter('start'))
-        
+
         longest_project = max(len(frame.project) for frame in frames)
         messages = [f.message for f in frames if f.message is not None]
 
-        longest_message = 0 if len(messages) == 0 else len(max(messages, key=len)) 
+        longest_message = 0 if len(messages) == 0 else len(max(messages, key=len))
 
         daily_total = reduce(
             operator.add,
@@ -696,28 +705,34 @@ def log(watson, current, from_, to, projects, tags, year, month, week, day,
         )
 
         _print(
-            get_format_string("log", "header_format").format(
+            get_formatted_string("log", "header_format").format(
                 date=style('date', "{:dddd DD MMMM YYYY}".format(day)),
                 daily_total=style('time', format_timedelta(daily_total))
             )
         )
+        lines.append(
+            get_formatted_string("log", "header_format",
+                                 date=style('date', "{:dddd DD MMMM YYYY}".format(day)),
+                                 daily_total=style('time', format_timedelta(daily_total))))
 
         lines.append("\n".join(
-            get_format_string("log", "entry_format").format(
-                delta=format_timedelta(frame.stop - frame.start),
-                project=style('project',
-                              '{:>{}}'.format(frame.project, longest_project)),
-                message=style_message_if_not_none(frame, longest_message),
-                pad=longest_project,
-                tags=(" "*2 if frame.tags else "") + style('tags', frame.tags),
-                start=style('time', '{:HH:mm}'.format(frame.start)),
-                stop=style('time', '{:HH:mm}'.format(frame.stop)),
-                id=style('short_id', frame.id)
-            )
+            get_formatted_string("log", "entry_format",
+                                 delta=format_timedelta(frame.stop - frame.start),
+                                 project=style('project',
+                                               '{:>{}}'.format(frame.project, longest_project)),
+                                 message=style_message_if_not_none(frame, longest_message),
+                                 pad=longest_project,
+                                 tags=(" " * 2 if frame.tags else "") + style('tags', frame.tags),
+                                 start=style('time', '{:HH:mm}'.format(frame.start)),
+                                 stop=style('time', '{:HH:mm}'.format(frame.stop)),
+                                 id=style('short_id', frame.id)
+                                 )
             for frame in frames
         ))
 
+
     _final_print(lines)
+
 
 
 @cli.command()
@@ -1032,7 +1047,7 @@ def sync(watson):
 @click.argument('frames_with_conflict', type=click.Path(exists=True))
 @click.option('-f', '--force', 'force', is_flag=True,
               help="If specified, then the merge will automatically "
-              "be performed.")
+                   "be performed.")
 @click.pass_obj
 def merge(watson, frames_with_conflict, force):
     """
