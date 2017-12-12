@@ -98,11 +98,11 @@ def help(ctx, command):
     click.echo(cmd.get_help(ctx))
 
 
-def _start(watson, project, tags, restart=False):
+def _start(watson, project, tags, restart=False, start=None):
     """
     Start project with given list of tags and save status.
     """
-    current = watson.start(project, tags, restart=restart)
+    current = watson.start(project, tags, restart=restart, start=start)
     click.echo("Starting project {} {} at {}".format(
         style('project', project),
         style('tags', current['tags']),
@@ -113,9 +113,10 @@ def _start(watson, project, tags, restart=False):
 
 @cli.command()
 @click.argument('args', nargs=-1)
+@click.option('--at', default=None, help="Change the start time to something other than now")
 @click.pass_obj
 @click.pass_context
-def start(ctx, watson, args):
+def start(ctx, watson, args, at):
     """
     Start monitoring time for the given project.
     You can add tags indicating more specifically what you are working on with
@@ -150,7 +151,7 @@ def start(ctx, watson, args):
             watson.config.getboolean('options', 'stop_on_start')):
         ctx.invoke(stop)
 
-    _start(watson, project, tags)
+    _start(watson, project, tags, start=at)
 
 
 @cli.command()

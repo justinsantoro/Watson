@@ -16,6 +16,9 @@ Other changes:
 
 * README rewritten in Markdown (personal preference)
 * Show frame message in ```log``` command
+* Define functions in a file found at *~/.config/watson/functions.py* that
+can be used to modify the output of elements.
+* Ability to change the log command format strings
 
 
 ## Roadmap ##
@@ -94,6 +97,11 @@ Below is a roadmap of features that I am wanting to add. While this fork should 
 there are some things that I would like, that I don't see the original version adding anytime soon.
 
 * Stevedore based plugin system for extensible backend system
+* Better date parsing
+* Set the start time in the ```start``` command to something other than now (maybe ```--at``` flag?)
+* Set the end time in the ```end``` command to something other than now (maybe ```-at``` flag?)
+* Better and clearer report output
+
 
 # Contributor Code of Conduct #
 

@@ -8,6 +8,9 @@ import os
 import uuid
 from functools import reduce
 
+from arrow.parser import ParserError
+from click import UsageError
+
 try:
     import configparser
 except ImportError:
@@ -62,6 +65,8 @@ class Watson(object):
         self._last_sync = None
         self._config = None
         self._config_changed = False
+
+        self._version = __version__
 
         self._dir = (kwargs.pop('config_dir', None) or
                      click.get_app_dir('watson'))
@@ -256,7 +261,7 @@ class Watson(object):
     def is_started(self):
         return bool(self.current)
 
-    def start(self, project, tags=None, restart=False):
+    def start(self, project, tags=None, restart=False, start=None):
         if not project:
             raise WatsonError("No project given.")
 
@@ -271,7 +276,21 @@ class Watson(object):
         if not restart:
             tags = (tags or []) + default_tags
 
-        self.current = {'project': project, 'tags': deduplicate(tags)}
+        if start is not None:
+            try:
+                start_time = arrow.get(start)
+            except ParserError:
+                time = start.split(":")
+                if len(time) == 2:
+                    start_time = arrow.utcnow().to('local').replace(hour=int(time[0]), minute=int(time[1]))
+                else:
+                    raise WatsonError(
+                        "Invalid start time. Should either be a time (3:00) or a date & time (YYYY-MM-DD mm:HH)"
+                    )
+
+            self.current = {'project': project, 'tags': deduplicate(tags), 'start': start_time}
+        else:
+            self.current = {'project': project, 'tags': deduplicate(tags)}
         return self.current
 
     def stop(self):
