@@ -562,10 +562,10 @@ def test_save_frames_no_change(config_dir, mock):
                     config_dir=config_dir)
 
     mock.patch('%s.open' % builtins, mock.mock_open())
-    json_mock = mock.patch('json.dump')
-    watson.save()
+    with mock.patch('json.dump') as json_mock:
+        watson.save()
 
-    assert not json_mock.called
+        assert not json_mock.called
 
 
 
@@ -607,6 +607,7 @@ def test_save_changed_frame(config_dir, mock):
     assert result[1][2] == 10
     assert result[1][3] == 20
     assert result[1][4] == ['A']
+
 
 
 def test_save_config_no_changes(mock, watson):
