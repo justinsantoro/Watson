@@ -20,14 +20,7 @@ Other changes:
 can be used to modify the output of elements.
 * Ability to change the log command format strings
 
-
-## Roadmap ##
-
-Below is a roadmap of features that I am wanting to add. While this fork should always have the same functionality as the upstream version,
-there are some things that I would like, that I don't see the original version adding anytime soon.
-
-* Stevedore based plugin system for extensible backend system
-=======
+You can see the full list of changes and how to use them in the [Wiki](https://github.com/JordanKnott/Watson/wiki)
 
 
 From the original documentation on Watson:
@@ -51,6 +44,8 @@ Since this is a personal fork, the best (and only) way to install is from the so
 ``` bash
 python setup.py install
 ```
+
+You can view the [changelog here](https://github.com/JordanKnott/Watson/blob/master/CHANGELOG.md)
 
 ## Usage ##
 
