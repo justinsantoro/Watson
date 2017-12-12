@@ -15,7 +15,14 @@ This fork contains the following PR's from the upstream branch:
 Other changes:
 
 * README rewritten in Markdown (personal preference)
+* Show frame message in ```log``` command
 
+## Roadmap ##
+
+Below is a roadmap of features that I am wanting to add. While this fork should always have the same functionality as the upstream version,
+there are some things that I would like, that I don't see the original version adding anytime soon.
+
+* Stevedore based plugin system for extensible backend system
 
 From the original documentation on Watson:
 
