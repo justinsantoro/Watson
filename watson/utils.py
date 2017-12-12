@@ -4,12 +4,12 @@ import json
 import os
 import shutil
 import tempfile
+import traceback
+from os.path import join
 
-import click
 import arrow
-
+import click
 from click.exceptions import UsageError
-
 
 try:
     text_type = (str, unicode)
@@ -17,37 +17,62 @@ except NameError:
     text_type = str
 
 
+def _style_tags(tags):
+    if not tags:
+        return ''
+
+    return '[{}]'.format(', '.join(
+        style('tag', tag) for tag in tags
+    ))
+
+
+def _style_short_id(id):
+    return style('id', id[:7])
+
+
+DEFAULT_STYLES = {
+    'project': {'fg': 'magenta'},
+    'tags': _style_tags,
+    'tag': {'fg': 'blue'},
+    'time': {'fg': 'green'},
+    'error': {'fg': 'red'},
+    'date': {'fg': 'cyan'},
+    'short_id': _style_short_id,
+    'id': {'fg': 'white'},
+    'message': {'fg': 'white'},
+}
+
+
 def style(name, element):
-    def _style_tags(tags):
-        if not tags:
-            return ''
+    element_style = DEFAULT_STYLES.get(name, {})
 
-        return '[{}]'.format(', '.join(
-            style('tag', tag) for tag in tags
-        ))
+    try:
+        config = click.get_current_context().obj.config
+        element_items = config.getitems('style:%s' % name)
+        if 'function' in element_items:
+            watson = click.get_current_context().obj
+            if watson.functions is not None and element_items['function'] in watson.functions:
+                tmp = watson.functions[element_items.get('function')](element)
+                return tmp
+        else:
+            if callable(element_style):
+                return element_style(element)
+            else:
+                element_style = element_style.copy()
+                element_style.update(element_items)
 
-    def _style_short_id(id):
-        return style('id', id[:7])
+    except (AttributeError, RuntimeError):
+        traceback.format_exc()
 
-    formats = {
-        'project': {'fg': 'magenta'},
-        'tags': _style_tags,
-        'tag': {'fg': 'blue'},
-        'time': {'fg': 'green'},
-        'error': {'fg': 'red'},
-        'date': {'fg': 'cyan'},
-        'short_id': _style_short_id,
-        'id': {'fg': 'white'},
-        'message': {'fg': 'white'},
-    }
+    return click.style(element, **element_style)
 
-    fmt = formats.get(name, {})
 
-    if isinstance(fmt, dict):
-        return click.style(element, **fmt)
-    else:
-        # The fmt might be a function if we need to do some computation
-        return fmt(element)
+def load_functions_file(app_dir):
+    functions_file = join(app_dir, 'functions.py')
+    namespace = {}
+    exec(open(functions_file).read(), namespace)
+    return namespace
+
 
 def style_message_if_not_none(frame, longest_message):
     """
@@ -97,12 +122,14 @@ def options(opt_list):
     Wrapper for the `value_proc` field in `click.prompt`, which validates
     that the user response is part of the list of accepted responses.
     """
+
     def value_proc(user_input):
         if user_input in opt_list:
             return user_input
         else:
             raise UsageError("Response should be one of [{}]".format(
                 ','.join(str(x) for x in opt_list)))
+
     return value_proc
 
 
@@ -165,8 +192,10 @@ def make_json_writer(func, *args, **kwargs):
     Return a function that receives a file-like object and writes the return
     value of func(*args, **kwargs) as JSON to it.
     """
+
     def writer(f):
         json.dump(func(*args, **kwargs), f, indent=1, ensure_ascii=False)
+
     return writer
 
 

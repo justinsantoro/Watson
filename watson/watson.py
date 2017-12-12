@@ -6,7 +6,6 @@ import json
 import operator
 import os
 import uuid
-
 from functools import reduce
 
 try:
@@ -20,8 +19,8 @@ import requests
 
 from .config import ConfigParser
 from .frames import Frames
-from .utils import deduplicate, make_json_writer, safe_save, sorted_groupby
-from .version import version as __version__  # noqa
+from .utils import deduplicate, make_json_writer, safe_save, sorted_groupby, load_functions_file
+from .version import version as __version__
 
 
 class WatsonError(RuntimeError):
@@ -127,6 +126,11 @@ class Watson(object):
             try:
                 config = ConfigParser()
                 config.read(self.config_file)
+                if config.getboolean("options", 'load_functions_file', False):
+                    self.functions = load_functions_file(self._dir)
+                else:
+                    self.functions = None
+
             except configparser.Error as e:
                 raise ConfigurationError(
                     "Cannot parse config file: {}".format(e))
@@ -409,7 +413,7 @@ class Watson(object):
 
     def merge_report(self, frames_with_conflict):
         conflict_file_frames = Frames(self._load_json_file(
-                                      frames_with_conflict, type=list))
+            frames_with_conflict, type=list))
         conflicting = []
         merging = []
 
@@ -442,8 +446,8 @@ class Watson(object):
 
         if self.current:
             if current or (current is None and
-                           self.config.getboolean(
-                               'options', 'report_current')):
+                               self.config.getboolean(
+                                   'options', 'report_current')):
                 cur = self.current
                 self.frames.add(cur['project'], cur['start'], arrow.utcnow(),
                                 cur['tags'], id="current")
@@ -460,12 +464,12 @@ class Watson(object):
         total = datetime.timedelta()
 
         report = {
-             'timespan': {
-                 'from': str(span.start),
-                 'to': str(span.stop),
-             },
-             'projects': []
-         }
+            'timespan': {
+                'from': str(span.start),
+                'to': str(span.stop),
+            },
+            'projects': []
+        }
 
         for project, frames in frames_by_project:
             frames = tuple(frames)
