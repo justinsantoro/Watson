@@ -17,12 +17,15 @@ Other changes:
 * README rewritten in Markdown (personal preference)
 * Show frame message in ```log``` command
 
+
 ## Roadmap ##
 
 Below is a roadmap of features that I am wanting to add. While this fork should always have the same functionality as the upstream version,
 there are some things that I would like, that I don't see the original version adding anytime soon.
 
 * Stevedore based plugin system for extensible backend system
+=======
+
 
 From the original documentation on Watson:
 
@@ -84,6 +87,13 @@ To list all available commands, either [read the documentation](https://tailorde
 ``` bash
   $ watson help
 ```
+
+## Roadmap ##
+
+Below is a roadmap of features that I am wanting to add. While this fork should always have the same functionality as the upstream version,
+there are some things that I would like, that I don't see the original version adding anytime soon.
+
+* Stevedore based plugin system for extensible backend system
 
 # Contributor Code of Conduct #
 
