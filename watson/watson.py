@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import itertools
 import json
 import operator
 import os
@@ -14,8 +15,8 @@ except ImportError:
     import ConfigParser as configparser
 
 import arrow
-import click
 import requests
+import click
 
 from .config import ConfigParser
 from .frames import Frames
@@ -34,10 +35,17 @@ class ConfigurationError(configparser.Error, WatsonError):
 class Watson(object):
     def __init__(self, **kwargs):
         """
-        :param frames: If given, should be a list representating the
-                        frames.
-                        If not given, the value is extracted
-                        from the frames file.
+        :param frames: If given, should be a sequence of frames or a
+                       frames.Frames instance.
+
+                       If a sequence is given, each item may either be a
+                       frames.Frame instance or a sequence of frame values,
+                       with at least these 4 items:
+
+                           (id, project, start, stop)
+
+                       If not given, the value is extracted from the frames
+                       file.
         :type frames: list
 
         :param current: If given, should be a dict representating the
@@ -179,7 +187,10 @@ class Watson(object):
 
     @frames.setter
     def frames(self, frames):
-        self._frames = Frames(frames)
+        if isinstance(frames, Frames):
+            self._frames = frames
+        else:
+            self._frames = Frames(frames)
 
     @property
     def current(self):
@@ -282,14 +293,15 @@ class Watson(object):
         """
         Return the list of all the existing projects, sorted by name.
         """
-        return sorted(set(self.frames['project']))
+        return sorted(set(self.frames.get_column('project')))
 
     @property
     def tags(self):
         """
         Return the list of the tags, sorted by name.
         """
-        return sorted(set(tag for tags in self.frames['tags'] for tag in tags))
+        return sorted(
+            set(itertools.chain.from_iterable(self.frames.get_column('tags'))))
 
     def _get_request_info(self, route):
         config = self.config
@@ -368,7 +380,7 @@ class Watson(object):
 
         frames = []
 
-        for frame in self.frames:
+        for frame in self.frames.values():
             if last_pull > frame.updated_at > self.last_sync:
                 frames.append({
                     'id': uuid.UUID(frame.id).urn,
@@ -400,7 +412,7 @@ class Watson(object):
         conflicting = []
         merging = []
 
-        for conflict_frame in conflict_file_frames:
+        for conflict_frame in conflict_file_frames.values():
             try:
                 original_frame = self.frames[conflict_frame.id]
 

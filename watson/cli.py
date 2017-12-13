@@ -715,7 +715,7 @@ def frames(watson):
     [...]
     """
     for frame in watson.frames:
-        click.echo(style('short_id', frame.id))
+        click.echo(style('short_id', frame))
 
 
 @cli.command(context_settings={'ignore_unknown_options': True})
@@ -745,10 +745,10 @@ def edit(watson, id):
         frame = get_frame_from_argument(watson, id)
         id = frame.id
     elif watson.is_started:
-        frame = Frame(watson.current['start'], None, watson.current['project'],
+        frame = Frame(None, watson.current['project'], watson.current['start'],
                       None, watson.current['tags'])
     elif watson.frames:
-        frame = watson.frames[-1]
+        frame = watson.frames.get_by_index(-1)
         id = frame.id
     else:
         raise click.ClickException(
@@ -1090,11 +1090,10 @@ def merge(watson, frames_with_conflict, force):
 
     # merge in any non-conflicting frames
     for frame in merging:
-        start, stop, project, id, tags, updated_at = frame.dump()
-        original_frames.add(project, start, stop, tags=tags, id=id,
-                            updated_at=updated_at)
+        id, project, start, stop, tags, updated_at = frame.dump()
+        original_frames.add(project, start, stop, tags=tags,
+                            updated_at=updated_at, id=id)
 
-    watson.frames = original_frames
     watson.frames.changed = True
     watson.save()
 
