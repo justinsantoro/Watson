@@ -6,14 +6,13 @@ import arrow
 
 from collections import OrderedDict, namedtuple
 
-FIELDS = ('id', 'project', 'start', 'stop', 'tags', 'updated_at', 'message')
 
+FIELDS = ('id', 'project', 'start', 'stop', 'tags', 'updated_at', 'message', 'link')
 
-FIELDS = ('id', 'project', 'start', 'stop', 'tags', 'updated_at', 'message')
 
 class Frame(namedtuple('Frame', FIELDS)):
     def __new__(cls, id, project, start, stop, tags=None, updated_at=None,
-                message=None):
+                message=None, link=None):
         try:
             if not isinstance(start, arrow.Arrow):
                 start = arrow.get(start)
@@ -36,7 +35,7 @@ class Frame(namedtuple('Frame', FIELDS)):
             tags = []
 
         return super(Frame, cls).__new__(
-            cls, id, project, start, stop, tags, updated_at, message
+            cls, id, project, start, stop, tags, updated_at, message, link
         )
 
     def dump(self):
@@ -45,7 +44,7 @@ class Frame(namedtuple('Frame', FIELDS)):
         updated_at = self.updated_at.timestamp
 
         return (self.id, self.project, start, stop, self.tags, updated_at,
-                self.message)
+                self.message, self.link)
 
     @property
     def day(self):
@@ -94,7 +93,6 @@ class Frames(OrderedDict):
 
         self.changed = False
 
-
     def __getitem__(self, id):
         try:
             return super(Frames, self).__getitem__(id)
@@ -109,7 +107,7 @@ class Frames(OrderedDict):
         if isinstance(value, Frame):
             frame = self.new_frame(value.project, value.start, value.stop,
                                    value.tags, value.updated_at, value.message,
-                                   id=key)
+                                   value.link, id=key)
         else:
             frame = self.new_frame(*value[:6], id=key)
 
@@ -124,7 +122,6 @@ class Frames(OrderedDict):
         self._keys.remove(key)
         self.changed = True
 
-
     def move_to_end(self, key, last=True):
         super(Frames, self).move_to_end(key, last)
         self._keys.remove(key)
@@ -136,11 +133,11 @@ class Frames(OrderedDict):
         return frame
 
     def new_frame(self, project, start, stop, tags=None, updated_at=None,
-                  message=None, id=None):
+                  message=None, link=None, id=None):
         if id is None:
             id = uuid.uuid4().hex
 
-        return Frame(id, project, start, stop, tags, updated_at, message)
+        return Frame(id, project, start, stop, tags, updated_at, message, link)
 
     def dump(self):
         return tuple(frame.dump() for frame in self.values())
@@ -154,7 +151,6 @@ class Frames(OrderedDict):
 
     def get_by_index(self, index):
         return self[self._keys[index]]
-
 
     def get_column(self, col):
         index = FIELDS.index(col)

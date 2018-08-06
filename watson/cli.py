@@ -157,8 +157,10 @@ def start(ctx, watson, args, at):
 @cli.command()
 @click.option('-m', '--message', 'message', default=None,
               help="Save given log message with the project frame.")
+@click.option('-l', '--link', 'link', default=None,
+              help="Save link to reference timed work")
 @click.pass_obj
-def stop(watson, message):
+def stop(watson, message, link):
     """
     Stop monitoring time for the current project.
 
@@ -172,8 +174,11 @@ def stop(watson, message):
     Stopping project apollo11, started a minute ago. (id: e7ccd52)
     Log message: Done some thinking
     """
-    if watson.is_started and message is not None:
-        watson._current['message'] = message
+    if watson.is_started:
+        if message is not None:
+            watson._current['message'] = message
+        if link is not None:
+            watson._current['link'] = link
 
     frame = watson.stop()
     click.echo("Stopping project {} {}, started {}. (id: {})".format(
@@ -185,7 +190,8 @@ def stop(watson, message):
 
     if frame.message is not None:
         click.echo("Log message: {}".format(style('message', frame.message)))
-
+    if frame.message is not None:
+        click.echo("Link: {}".format(style('message', frame.link)))
     watson.save()
 
 
@@ -660,6 +666,8 @@ def log(watson, current, from_, to, projects, tags, year, month, week, day,
                 'stop': frame.stop.isoformat(),
                 'project': frame.project,
                 'tags': frame.tags,
+                'message': frame.message,
+                'link': frame.link
             }
             for frame in filtered_frames
             ]
